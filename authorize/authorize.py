@@ -4,7 +4,7 @@ from .authorize_forms import *
 authorize = Blueprint('authorize', __name__, template_folder='templates', static_folder='static')
 
 from flask_login import login_user, logout_user, login_required, current_user
-from main import User
+from models import User
 
 
 @authorize.route('/login', methods=['GET', 'POST'])
