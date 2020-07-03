@@ -1,20 +1,21 @@
 from flask import Blueprint, redirect, render_template
 from .authorize_forms import *
-import mongoengine
+
 authorize = Blueprint('authorize', __name__, template_folder='templates', static_folder='static')
-from main import User, db
-from flask_login import current_user, LoginManager, login_user, logout_user, login_required
+
+from flask_login import login_user, logout_user, login_required, current_user
+from main import User
 
 
 @authorize.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.objects.first(_nickname=form.email_or_nickname.data)
+        user = User.objects(nickname=form.email_or_nickname.data).first()
         if not user:
-            user = User.objects.first(_email=form.email_or_nickname.data)
+            user = User.objects(email=form.email_or_nickname.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
+            login_user(user)
             return redirect('/')
         return render_template('authorize/login.html',
                                message="Неправильный логин или пароль",
@@ -36,7 +37,6 @@ def register():
                                        form=form,
                                        message="Такой пользователь уже есть")
         finally:
-            print(User.set_password(form.password.data))
             User(
                 email=form.email.data,
                 nickname=form.nickname.data,
@@ -44,3 +44,10 @@ def register():
             ).save()
             return redirect('/')
     return render_template('authorize/register.html', title='Регистрация', form=form)
+
+
+@authorize.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
