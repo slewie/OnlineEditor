@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>{{ form.text_area.label }} <br>
+    {{ form.text_area(id="docs_container", cols="243", rows="13") }}
+    </p>
+    <p>{{ form.save(type="submit", class="btn btn-primary", id="save_btn") }}</p>
+</form>
+{% endblock %}

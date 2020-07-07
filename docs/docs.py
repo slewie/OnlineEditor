@@ -1,6 +1,6 @@
 from flask import redirect, render_template, Blueprint
 from flask_login import login_required
-
+from .docs_forms import DocForm
 docs = Blueprint('docs', __name__, template_folder='templates', static_folder='static')
 from models import Docs
 
@@ -18,6 +18,13 @@ def create():
 
 
 @login_required
-@docs.route('/doc/<doc_id>')
+@docs.route('/doc/<doc_id>', methods=['GET', 'POST'])
 def doc(doc_id):
-    return 'ab'
+    form = DocForm()
+    if form.validate_on_submit():
+        Docs.objects(
+            id=doc_id
+        ).update(
+            text=form.text_area.data
+        )
+    return render_template('docs/docs.html', form=form)
