@@ -15,7 +15,7 @@ def login():
         if not user:
             user = User.objects(email=form.email_or_nickname.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user)
+            login_user(user, remember=form.remember_me.data)
             return redirect('/')
         return render_template('authorize/login.html',
                                message="Неправильный логин или пароль",
@@ -31,18 +31,17 @@ def register():
             return render_template('authorize/register.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
-        try:
-            if User.objects.get(email=form.email.data):
-                return render_template('authorize/register.html', title='Регистрация',
-                                       form=form,
-                                       message="Такой пользователь уже есть")
-        finally:
-            User(
-                email=form.email.data,
-                nickname=form.nickname.data,
-                hashed_password=User.set_password(form.password.data)
-            ).save()
-            return redirect('/')
+
+        if User.objects.get(email=form.email.data):
+            return render_template('authorize/register.html', title='Регистрация',
+                                   form=form,
+                                   message="Такой пользователь уже есть")
+        User(
+            email=form.email.data,
+            nickname=form.nickname.data,
+            hashed_password=User.set_password(form.password.data)
+        ).save()
+        return redirect('/')
     return render_template('authorize/register.html', title='Регистрация', form=form)
 
 
