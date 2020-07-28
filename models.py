@@ -22,7 +22,10 @@ class User(db.Document, UserMixin):
 
     @staticmethod
     def get_user():
-        return User.objects(id=current_user.id).first()
+        try:
+            return User.objects(id=current_user.id).first()
+        except AttributeError:
+            pass
 
     @staticmethod
     @login_manager.user_loader
@@ -33,7 +36,8 @@ class User(db.Document, UserMixin):
 class Docs(db.Document):
     author = db.ReferenceField(User)
     text = db.StringField()
+    name = db.StringField()
 
     @staticmethod
-    def get_doc_id():
-        return Docs(text='', author=User.get_user()).save().id
+    def get_doc_id(name='Новый документ', text=''):
+        return Docs(name=name, text=text, author=User.get_user()).save().id

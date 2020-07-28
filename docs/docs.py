@@ -1,4 +1,4 @@
-from flask import redirect, render_template, Blueprint
+from flask import redirect, render_template, Blueprint, jsonify, url_for
 from flask_login import login_required, current_user
 from .docs_forms import DocForm
 docs = Blueprint('docs', __name__, template_folder='templates', static_folder='static')
@@ -23,12 +23,17 @@ def create():
 def doc(doc_id):
     form = DocForm()
     document = Docs.objects(id=doc_id).first()
-    if len(document.text) != 0:
+    if len(document.text) != 0 and form.text_area.data is None:
         form.text_area.data = document.text
-    if form.validate_on_submit():
-        Docs.objects(
-            id=doc_id
-        ).update(
-            text=form.text_area.data
-        )
+    if form.is_submitted():
+        document.update(text=form.text_area.data)
     return render_template('docs/docs.html', form=form)
+
+
+@login_required
+@docs.route('/doc/delete/<doc_id>')
+def delete_docs(doc_id):
+    Docs.objects(id=doc_id).delete()
+    return redirect('/all_pages')
+
+
